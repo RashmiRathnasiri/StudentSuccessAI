@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Success AI</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🎓</div>
+
+                <div>
+                    <h1>Student Success AI</h1>
+                    <p>AI-Powered Academic Success Prediction</p>
+                </div>
+            </div>
+        </header>
+
+
+        <main>
+
+            <section class="hero">
+
+                <div>
+                    <span class="badge">🤖 AI POWERED</span>
+
+                    <h2>
+                        Predict Your
+                        <span>Academic Success</span>
+                    </h2>
+
+                    <p>
+                        Enter your academic performance details and
+                        let our AI model predict your future success.
+                    </p>
+                </div>
+
+            </section>
+
+
+            <section class="card">
+
+                <h3>📊 Student Performance</h3>
+
+                <p class="description">
+                    Enter your current academic information
+                </p>
+
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Attendance (%)</label>
+                        <input
+                            type="number"
+                            id="attendance"
+                            placeholder="e.g. 88"
+                            min="0"
+                            max="100"
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Assignment (%)</label>
+                        <input
+                            type="number"
+                            id="assignment"
+                            placeholder="e.g. 82"
+                            min="0"
+                            max="100"
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Quiz (%)</label>
+                        <input
+                            type="number"
+                            id="quiz"
+                            placeholder="e.g. 80"
+                            min="0"
+                            max="100"
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Midterm (%)</label>
+                        <input
+                            type="number"
+                            id="midterm"
+                            placeholder="e.g. 85"
+                            min="0"
+                            max="100"
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Study Hours / Week</label>
+                        <input
+                            type="number"
+                            id="study_hours"
+                            placeholder="e.g. 9"
+                            min="0"
+                            max="100"
+                        >
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Previous GPA</label>
+                        <input
+                           type="number"
+                           id="previous_gpa"
+                           placeholder="e.g. 7.2"
+                           min="0"
+                           max="10"
+                           step="0.1"
+>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Participation (%)</label>
+                        <input
+                            type="number"
+                            id="participation"
+                            placeholder="e.g. 86"
+                            min="0"
+                            max="100"
+                        >
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="predict-button"
+                    onclick="predictSuccess()"
+                >
+                    🤖 Predict My Success
+                </button>
+
+                <p id="errorMessage"></p>
+
+            </section>
+
+            <!-- RESULT -->
+
+<section
+    class="result-card"
+    id="resultCard"
+>
+
+    <div class="result-icon">
+        🎯
+    </div>
+
+    <p class="result-label">
+        PREDICTED FINAL SCORE
+    </p>
+
+    <h2 id="score">
+        --
+    </h2>
+
+    <h3 id="status">
+        --
+    </h3>
+
+    <div class="risk">
+        <span>Risk Level</span>
+
+        <strong id="risk">
+            --
+        </strong>
+    </div>
+
+    <p id="message"></p>
+
+</section>
+
+<!-- PERFORMANCE ANALYSIS -->
+
+<section
+    id="performanceAnalysis"
+    class="performance-analysis"
+>
+
+    <h3>📊 Performance Analysis</h3>
+
+
+    <!-- Attendance -->
+
+    <div class="performance-item">
+
+        <div class="performance-header">
+
+            <span>Attendance</span>
+
+            <strong id="attendanceResult">
+                0%
+            </strong>
+
+        </div>
+
+        <div class="progress-bar">
+
+            <div
+                id="attendanceBar"
+                class="progress-fill"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Assignment -->
+
+    <div class="performance-item">
+
+        <div class="performance-header">
+
+            <span>Assignment</span>
+
+            <strong id="assignmentResult">
+                0%
+            </strong>
+
+        </div>
+
+        <div class="progress-bar">
+
+            <div
+                id="assignmentBar"
+                class="progress-fill"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Quiz -->
+
+    <div class="performance-item">
+
+        <div class="performance-header">
+
+            <span>Quiz</span>
+
+            <strong id="quizResult">
+                0%
+            </strong>
+
+        </div>
+
+        <div class="progress-bar">
+
+            <div
+                id="quizBar"
+                class="progress-fill"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Midterm -->
+
+    <div class="performance-item">
+
+        <div class="performance-header">
+
+            <span>Midterm</span>
+
+            <strong id="midtermResult">
+                0%
+            </strong>
+
+        </div>
+
+        <div class="progress-bar">
+
+            <div
+                id="midtermBar"
+                class="progress-fill"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Study Hours -->
+
+    <div class="performance-item">
+
+        <div class="performance-header">
+
+            <span>Study Hours</span>
+
+            <strong id="studyResult">
+                0 hrs
+            </strong>
+
+        </div>
+
+        <div class="progress-bar">
+
+            <div
+                id="studyBar"
+                class="progress-fill"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Participation -->
+
+    <div class="performance-item">
+
+        <div class="performance-header">
+
+            <span>Participation</span>
+
+            <strong id="participationResult">
+                0%
+            </strong>
+
+        </div>
+
+        <div class="progress-bar">
+
+            <div
+                id="participationBar"
+                class="progress-fill"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Strong / Improve Areas -->
+
+    <div class="analysis-columns">
+
+
+        <div class="strong-area">
+
+            <h4>
+                💪 Strong Areas
+            </h4>
+
+            <div id="strongAreas"></div>
+
+        </div>
+
+
+        <div class="improve-area">
+
+            <h4>
+                ⚠️ Areas to Improve
+            </h4>
+
+            <div id="improveAreas"></div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+<!-- AI RECOMMENDATIONS -->  
+            <div id="recommendationsSection" class="recommendations-section">
+
+               <h3>🤖 AI Personalized Recommendations</h3>
+
+               <div id="recommendationsList"></div>
+
+        </div> 
+
+        </main>
+
+
+        <footer>
+            <p>
+                Student Success AI © 2026
+            </p>
+
+            <p>
+                Powered by Machine Learning
+            </p>
+        </footer>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+    <!-- AI IMPROVEMENT SIMULATOR -->
+
+<section
+    id="improvementSimulator"
+    class="simulator-section"
+>
+
+    <div class="simulator-header">
+
+        <span class="badge">
+            🚀 AI SIMULATOR
+        </span>
+
+        <h3>
+            What If I Improve?
+        </h3>
+
+        <p>
+            See how improving your academic performance
+            could affect your predicted success.
+        </p>
+
+    </div>
+
+
+    <div class="simulator-grid">
+
+
+        <div class="simulator-input">
+
+            <label>
+                Target Attendance (%)
+            </label>
+
+            <input
+                type="number"
+                id="targetAttendance"
+                min="0"
+                max="100"
+                placeholder="e.g. 90"
+            >
+
+
+            <label>
+                Target Assignment (%)
+            </label>
+
+            <input
+                type="number"
+                id="targetAssignment"
+                min="0"
+                max="100"
+                placeholder="e.g. 85"
+            >
+
+
+            <label>
+                Target Quiz (%)
+            </label>
+
+            <input
+                type="number"
+                id="targetQuiz"
+                min="0"
+                max="100"
+                placeholder="e.g. 85"
+            >
+
+
+            <label>
+                Target Study Hours
+            </label>
+
+            <input
+                type="number"
+                id="targetStudyHours"
+                min="0"
+                max="100"
+                placeholder="e.g. 10"
+            >
+
+
+            <button
+                class="simulate-button"
+                onclick="simulateImprovement()"
+            >
+                🚀 Simulate Improvement
+            </button>
+
+        </div>
+
+
+        <div
+            id="simulationResult"
+            class="simulation-result"
+        >
+
+            <div class="simulation-icon">
+                📈
+            </div>
+
+            <p>
+                POSSIBLE FUTURE SCORE
+            </p>
+
+            <h2 id="futureScore">
+                --
+            </h2>
+
+            <div id="improvementMessage">
+                Enter your target performance
+                to see the possible improvement.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+</body>
+</html>
