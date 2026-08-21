@@ -2,15 +2,21 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+
+# ============================================================
+# STUDENT SUCCESS AI
+# ============================================================
+
 app = FastAPI(
     title="Student Success AI",
     description="AI-powered student success prediction and personalized academic advisor",
     version="1.0.0"
 )
 
-# ==============================
+
+# ============================================================
 # CORS
-# ==============================
+# ============================================================
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,9 +27,9 @@ app.add_middleware(
 )
 
 
-# ==============================
+# ============================================================
 # STUDENT DATA
-# ==============================
+# ============================================================
 
 class StudentData(BaseModel):
 
@@ -36,9 +42,9 @@ class StudentData(BaseModel):
     participation: float
 
 
-# ==============================
+# ============================================================
 # HOME
-# ==============================
+# ============================================================
 
 @app.get("/")
 def root():
@@ -48,9 +54,9 @@ def root():
     }
 
 
-# ==============================
+# ============================================================
 # HEALTH
-# ==============================
+# ============================================================
 
 @app.get("/health")
 def health():
@@ -60,94 +66,307 @@ def health():
     }
 
 
-# ==============================
+# ============================================================
 # PREDICTION
-# ==============================
+# ============================================================
 
 @app.post("/predict")
 def predict_student(data: StudentData):
 
-    # ==============================
-    # GPA → PERCENTAGE
-    # ==============================
+    # ========================================================
+    # GPA CONVERSION
+    # GPA / 10 × 100
+    # ========================================================
 
-    gpa_percentage = (
-        data.previous_gpa / 10
-    ) * 100
-
-
-    # ==============================
-    # STUDY HOURS
-    # 100 HOURS = 100%
-    # ==============================
-
-    study_percentage = data.study_hours
+    gpa_percentage = (data.previous_gpa / 10) * 100
 
 
-    # ==============================
-    # FINAL SCORE
-    # ==============================
+    # ========================================================
+    # ADD ALL 7 VALUES
+    # ========================================================
 
     total_score = (
-
         data.attendance
         + data.assignment
         + data.quiz
         + data.midterm
-        + study_percentage
+        + data.study_hours
         + gpa_percentage
         + data.participation
-
     )
 
 
-    prediction = (
-        total_score / 700
-    ) * 100
+    # ========================================================
+    # FINAL SCORE
+    # TOTAL / 700 × 100
+    # ========================================================
+
+    prediction = (total_score / 700) * 100
+
+    prediction = max(0, min(100, prediction))
+
+    prediction = round(prediction, 2)
 
 
-    # Keep score between 0 and 100
-
-    prediction = max(
-        0,
-        min(100, prediction)
-    )
-
-
-    # ==============================
-    # SUCCESS STATUS
-    # ==============================
+    # ========================================================
+    # SUCCESS STATUS + RISK
+    # ========================================================
 
     if prediction >= 75:
 
         status = "High Success Probability"
-
         risk = "Low Risk"
-
 
     elif prediction >= 50:
 
         status = "Moderate Success Probability"
-
         risk = "Medium Risk"
-
 
     else:
 
         status = "Low Success Probability"
-
         risk = "High Risk"
 
 
-    # ==============================
+    # ========================================================
+    # EXPLAINABLE AI
+    # ========================================================
+
+    explanations = []
+
+
+    # ========================================================
+    # ATTENDANCE
+    # ========================================================
+
+    if data.attendance >= 85:
+
+        explanations.append({
+            "factor": "Attendance",
+            "impact": "Positive",
+            "message":
+                "Your strong attendance is positively supporting your predicted score."
+        })
+
+    elif data.attendance >= 75:
+
+        explanations.append({
+            "factor": "Attendance",
+            "impact": "Moderate",
+            "message":
+                "Your attendance is supporting your prediction, but further improvement could help."
+        })
+
+    else:
+
+        explanations.append({
+            "factor": "Attendance",
+            "impact": "Negative",
+            "message":
+                "Low attendance is negatively affecting your predicted academic performance."
+        })
+
+
+    # ========================================================
+    # ASSIGNMENT
+    # ========================================================
+
+    if data.assignment >= 85:
+
+        explanations.append({
+            "factor": "Assignment",
+            "impact": "Positive",
+            "message":
+                "Your strong assignment performance is positively supporting your prediction."
+        })
+
+    elif data.assignment >= 70:
+
+        explanations.append({
+            "factor": "Assignment",
+            "impact": "Moderate",
+            "message":
+                "Your assignment performance is moderate and could be improved further."
+        })
+
+    else:
+
+        explanations.append({
+            "factor": "Assignment",
+            "impact": "Negative",
+            "message":
+                "Low assignment performance is reducing your predicted score."
+        })
+
+
+    # ========================================================
+    # QUIZ
+    # ========================================================
+
+    if data.quiz >= 85:
+
+        explanations.append({
+            "factor": "Quiz",
+            "impact": "Positive",
+            "message":
+                "Your strong quiz performance is positively contributing to your prediction."
+        })
+
+    elif data.quiz >= 70:
+
+        explanations.append({
+            "factor": "Quiz",
+            "impact": "Moderate",
+            "message":
+                "Your quiz performance has a moderate effect on your predicted score."
+        })
+
+    else:
+
+        explanations.append({
+            "factor": "Quiz",
+            "impact": "Negative",
+            "message":
+                "Your quiz performance is below the recommended level and is affecting your prediction."
+        })
+
+
+    # ========================================================
+    # MIDTERM
+    # ========================================================
+
+    if data.midterm >= 85:
+
+        explanations.append({
+            "factor": "Midterm",
+            "impact": "Positive",
+            "message":
+                "Your strong midterm performance is positively supporting your predicted score."
+        })
+
+    elif data.midterm >= 70:
+
+        explanations.append({
+            "factor": "Midterm",
+            "impact": "Moderate",
+            "message":
+                "Your midterm performance has a moderate effect on the prediction."
+        })
+
+    else:
+
+        explanations.append({
+            "factor": "Midterm",
+            "impact": "Negative",
+            "message":
+                "Your midterm performance is reducing your predicted academic outcome."
+        })
+
+
+    # ========================================================
+    # STUDY HOURS
+    # ========================================================
+
+    if data.study_hours >= 10:
+
+        explanations.append({
+            "factor": "Study Hours",
+            "impact": "Positive",
+            "message":
+                "Your strong study routine is positively supporting your prediction."
+        })
+
+    elif data.study_hours >= 5:
+
+        explanations.append({
+            "factor": "Study Hours",
+            "impact": "Moderate",
+            "message":
+                "Your study time is reasonable, but additional focused study could improve your result."
+        })
+
+    else:
+
+        explanations.append({
+            "factor": "Study Hours",
+            "impact": "Negative",
+            "message":
+                "Low study time may be limiting your predicted academic performance."
+        })
+
+
+    # ========================================================
+    # PREVIOUS GPA
+    # ========================================================
+
+    if data.previous_gpa >= 3.2:
+
+        explanations.append({
+            "factor": "Previous GPA",
+            "impact": "Positive",
+            "message":
+                "Your strong previous GPA is positively supporting your prediction."
+        })
+
+    elif data.previous_gpa >= 2.5:
+
+        explanations.append({
+            "factor": "Previous GPA",
+            "impact": "Moderate",
+            "message":
+                "Your previous GPA provides a moderate contribution to your prediction."
+        })
+
+    else:
+
+        explanations.append({
+            "factor": "Previous GPA",
+            "impact": "Negative",
+            "message":
+                "Your previous GPA indicates an area that could be improved for stronger future performance."
+        })
+
+
+    # ========================================================
+    # PARTICIPATION
+    # ========================================================
+
+    if data.participation >= 85:
+
+        explanations.append({
+            "factor": "Participation",
+            "impact": "Positive",
+            "message":
+                "Your active classroom participation is positively supporting your prediction."
+        })
+
+    elif data.participation >= 70:
+
+        explanations.append({
+            "factor": "Participation",
+            "impact": "Moderate",
+            "message":
+                "Your classroom participation is moderate and could be improved."
+        })
+
+    else:
+
+        explanations.append({
+            "factor": "Participation",
+            "impact": "Negative",
+            "message":
+                "Low classroom participation is affecting your predicted academic performance."
+        })
+
+
+    # ========================================================
     # RECOMMENDATIONS
-    # ==============================
+    # ========================================================
 
     recommendations = []
 
 
     # Attendance
-
     if data.attendance < 75:
 
         recommendations.append(
@@ -168,7 +387,6 @@ def predict_student(data: StudentData):
 
 
     # Assignment
-
     if data.assignment < 70:
 
         recommendations.append(
@@ -189,7 +407,6 @@ def predict_student(data: StudentData):
 
 
     # Quiz
-
     if data.quiz < 70:
 
         recommendations.append(
@@ -210,7 +427,6 @@ def predict_student(data: StudentData):
 
 
     # Midterm
-
     if data.midterm < 70:
 
         recommendations.append(
@@ -231,7 +447,6 @@ def predict_student(data: StudentData):
 
 
     # Study Hours
-
     if data.study_hours < 5:
 
         recommendations.append(
@@ -252,7 +467,6 @@ def predict_student(data: StudentData):
 
 
     # GPA
-
     if data.previous_gpa < 2.5:
 
         recommendations.append(
@@ -273,7 +487,6 @@ def predict_student(data: StudentData):
 
 
     # Participation
-
     if data.participation < 70:
 
         recommendations.append(
@@ -293,26 +506,21 @@ def predict_student(data: StudentData):
         )
 
 
-    # ==============================
+    # ========================================================
     # RESPONSE
-    # ==============================
+    # ========================================================
 
     return {
 
-        "predicted_score":
-            round(
-                float(prediction),
-                2
-            ),
+        "predicted_score": prediction,
 
-        "status":
-            status,
+        "status": status,
 
-        "risk":
-            risk,
+        "risk": risk,
 
-        "recommendations":
-            recommendations,
+        "explanations": explanations,
+
+        "recommendations": recommendations,
 
         "message":
             "Student success score calculated successfully."

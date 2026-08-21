@@ -1,474 +1,561 @@
-document.getElementById("attendance").addEventListener("input", function () {
-    console.log("Typed value:", this.value);
+// =================================================
+// STUDENT SUCCESS AI
+// =================================================
+
+// Prevent number input scroll
+document.querySelectorAll('input[type="number"]').forEach(function (input) {
+    input.addEventListener("wheel", function (event) {
+        event.preventDefault();
+        this.blur();
+    });
+
+    input.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+        }
+    });
 });
 
-async function predictSuccess() {
 
-    const errorMessage =
-        document.getElementById("errorMessage");
+// =================================================
+// PREDICT STUDENT SUCCESS
+// =================================================
 
-    errorMessage.textContent = "";
+function predictSuccess() {
 
-    const attendance =
-        document.getElementById("attendance").value;
+    var attendanceInput = document.getElementById("attendance");
+    var assignmentInput = document.getElementById("assignment");
+    var quizInput = document.getElementById("quiz");
+    var midtermInput = document.getElementById("midterm");
+    var studyHoursInput = document.getElementById("study_hours");
+    var gpaInput = document.getElementById("previous_gpa");
+    var participationInput = document.getElementById("participation");
 
-    const assignment =
-        document.getElementById("assignment").value;
+    var errorMessage = document.getElementById("errorMessage");
 
-    const quiz =
-        document.getElementById("quiz").value;
-
-    const midterm =
-        document.getElementById("midterm").value;
-
-    const study_hours =
-        document.getElementById("study_hours").value;
-
-    const previous_gpa =
-        document.getElementById("previous_gpa").value;
-
-    const participation =
-        document.getElementById("participation").value;
-
-
-    // Validate inputs
-
+    // Check empty fields
     if (
-        attendance === "" ||
-        assignment === "" ||
-        quiz === "" ||
-        midterm === "" ||
-        study_hours === "" ||
-        previous_gpa === "" ||
-        participation === ""
+        attendanceInput.value === "" ||
+        assignmentInput.value === "" ||
+        quizInput.value === "" ||
+        midtermInput.value === "" ||
+        studyHoursInput.value === "" ||
+        gpaInput.value === "" ||
+        participationInput.value === ""
     ) {
-
         errorMessage.textContent =
             "Please fill in all student performance fields.";
-
         return;
     }
 
-
-    const studentData = {
-
-        attendance: Number(attendance),
-        assignment: Number(assignment),
-        quiz: Number(quiz),
-        midterm: Number(midterm),
-        study_hours: Number(study_hours),
-        previous_gpa: Number(previous_gpa),
-        participation: Number(participation)
-
-    };
-
-
-    try {
-
-        const button =
-            document.querySelector(".predict-button");
-
-        button.textContent =
-            "🤖 AI is analyzing...";
-
-        button.disabled = true;
-
-
-        // Send data to backend
-
-        const response = await fetch(
-            "http://127.0.0.1:8000/predict",
-            {
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify(studentData)
-            }
-        );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Server returned status " +
-                response.status
-            );
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        console.log(
-            "AI RESULT:",
-            data
-        );
-
-
-        // =========================
-        // DISPLAY AI RESULT
-        // =========================
-
-        document.getElementById("score")
-            .textContent =
-            data.predicted_score + "%";
-
-
-        document.getElementById("status")
-            .textContent =
-            data.status;
-
-
-        const riskElement =
-    document.getElementById("risk");
-
-riskElement.textContent = data.risk;
-
-riskElement.className = "";
-
-if (data.risk === "Low Risk") {
-
-    riskElement.classList.add("low-risk");
-
-}
-
-else if (data.risk === "Medium Risk") {
-
-    riskElement.classList.add("medium-risk");
-
-}
-
-else if (data.risk === "High Risk") {
-
-    riskElement.classList.add("high-risk");
-
-}
-        
-        
-
-
-        document.getElementById("message")
-            .textContent =
-            data.message;
-
-
-        // =========================
-        // PERFORMANCE ANALYSIS
-        // =========================
-
-        const performanceAnalysis =
-            document.getElementById(
-                "performanceAnalysis"
-            );
-
-        if (performanceAnalysis) {
-
-            performanceAnalysis.style.display =
-                "block";
-        }
-
-
-        const performance = [
-
-            {
-                name: "Attendance",
-                value: Number(attendance),
-                result: "attendanceResult",
-                bar: "attendanceBar"
-            },
-
-            {
-                name: "Assignment",
-                value: Number(assignment),
-                result: "assignmentResult",
-                bar: "assignmentBar"
-            },
-
-            {
-                name: "Quiz",
-                value: Number(quiz),
-                result: "quizResult",
-                bar: "quizBar"
-            },
-
-            {
-                name: "Midterm",
-                value: Number(midterm),
-                result: "midtermResult",
-                bar: "midtermBar"
-            },
-
-            {
-                name: "Participation",
-                value: Number(participation),
-                result: "participationResult",
-                bar: "participationBar"
-            }
-
-        ];
-
-
-        performance.forEach(item => {
-
-            const resultElement =
-                document.getElementById(
-                    item.result
-                );
-
-            const barElement =
-                document.getElementById(
-                    item.bar
-                );
-
-
-            if (resultElement) {
-
-                resultElement.textContent =
-                    item.value + "%";
-            }
-
-
-            if (barElement) {
-
-                barElement.style.width =
-                    item.value + "%";
-            }
-
-        });
-
-
-        // =========================
-        // STUDY HOURS
-        // =========================
-
-        const studyPercentage =
-            Math.min(
-                Number(study_hours) * 10,
-                100
-            );
-
-
-        const studyResult =
-            document.getElementById(
-                "studyResult"
-            );
-
-        const studyBar =
-            document.getElementById(
-                "studyBar"
-            );
-
-
-        if (studyResult) {
-
-            studyResult.textContent =
-                study_hours + " hrs";
-        }
-
-
-        if (studyBar) {
-
-            studyBar.style.width =
-                studyPercentage + "%";
-        }
-
-
-        // =========================
-        // STRONG / IMPROVE AREAS
-        // =========================
-
-        const strongAreas =
-            document.getElementById(
-                "strongAreas"
-            );
-
-        const improveAreas =
-            document.getElementById(
-                "improveAreas"
-            );
-
-
-        if (strongAreas && improveAreas) {
-
-            strongAreas.innerHTML = "";
-            improveAreas.innerHTML = "";
-
-
-            performance.forEach(item => {
-
-                if (item.value >= 85) {
-
-                    strongAreas.innerHTML += `
-                        <div class="area-item">
-                            ✓ ${item.name} (${item.value}%)
-                        </div>
-                    `;
-
-                }
-
-                else if (item.value < 75) {
-
-                    improveAreas.innerHTML += `
-                        <div class="area-item">
-                            → ${item.name} (${item.value}%)
-                        </div>
-                    `;
-
-                }
-
-            });
-
-
-            // Study hours
-
-            if (Number(study_hours) >= 10) {
-
-                strongAreas.innerHTML += `
-                    <div class="area-item">
-                        ✓ Study Routine (${study_hours} hrs)
-                    </div>
-                `;
-
-            }
-
-            else if (Number(study_hours) < 7) {
-
-                improveAreas.innerHTML += `
-                    <div class="area-item">
-                        → Study Routine (${study_hours} hrs)
-                    </div>
-                `;
-
-            }
-
-
-            if (improveAreas.innerHTML === "") {
-
-                improveAreas.innerHTML = `
-                    <div class="area-item">
-                        ✓ No major weaknesses detected
-                    </div>
-                `;
-
-            }
-
-        }
-
-
-        // =========================
-        // AI RECOMMENDATIONS
-        // =========================
-
-        const recommendationsList =
-            document.getElementById(
-                "recommendationsList"
-            );
-
-
-        if (
-            recommendationsList &&
-            data.recommendations
-        ) {
-
-            recommendationsList.innerHTML = "";
-
-
-            data.recommendations.forEach(
-                recommendation => {
-
-                    const item =
-                        document.createElement(
-                            "div"
-                        );
-
-
-                    item.className =
-                        "recommendation-item";
-
-
-                    item.innerHTML = `
-                        <span class="recommendation-icon">
-                            💡
-                        </span>
-
-                        <span>
-                            ${recommendation}
-                        </span>
-                    `;
-
-
-                    recommendationsList
-                        .appendChild(item);
-
-                }
-            );
-
-        }
-
-
-        // =========================
-        // SHOW RESULT
-        // =========================
-
-        const resultCard =
-            document.getElementById(
-                "resultCard"
-            );
-
-
-        if (resultCard) {
-
-            resultCard.style.display =
-                "block";
-
-
-            resultCard.scrollIntoView({
-                behavior: "smooth"
-            });
-
-        }
-
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "AI Error:",
-            error
-        );
-
-
-        errorMessage.textContent =
-            "Error: " + error.message;
+    // Get values
+    var attendance = Number(attendanceInput.value);
+    var assignment = Number(assignmentInput.value);
+    var quiz = Number(quizInput.value);
+    var midterm = Number(midtermInput.value);
+    var studyHours = Number(studyHoursInput.value);
+    var previousGPA = Number(gpaInput.value);
+    var participation = Number(participationInput.value);
+
+
+    // =================================================
+    // GPA CONVERSION
+    // GPA / 10 × 100
+    // =================================================
+
+    var gpaPercentage = (previousGPA / 10) * 100;
+
+
+    // =================================================
+    // FINAL SCORE
+    //
+    // 7 VALUES
+    // ADD THEM
+    // DIVIDE BY 700
+    // MULTIPLY BY 100
+    // =================================================
+
+    var totalScore =
+        attendance +
+        assignment +
+        quiz +
+        midterm +
+        studyHours +
+        gpaPercentage +
+        participation;
+
+    var finalScore = (totalScore / 700) * 100;
+
+    finalScore = Number(finalScore.toFixed(2));
+
+
+    console.log("Attendance:", attendance);
+    console.log("Assignment:", assignment);
+    console.log("Quiz:", quiz);
+    console.log("Midterm:", midterm);
+    console.log("Study Hours:", studyHours);
+    console.log("Previous GPA:", previousGPA);
+    console.log("GPA Percentage:", gpaPercentage);
+    console.log("Participation:", participation);
+    console.log("Total:", totalScore);
+    console.log("Final Score:", finalScore);
+
+
+    // =================================================
+    // STATUS & RISK
+    // =================================================
+
+    var status;
+    var risk;
+    var message;
+
+    if (finalScore >= 75) {
+
+        status = "High Success Probability";
+        risk = "Low Risk";
+        message =
+            "Your academic performance indicates a strong likelihood of success.";
+
+    } else if (finalScore >= 50) {
+
+        status = "Moderate Success Probability";
+        risk = "Medium Risk";
+        message =
+            "Your performance is moderate. Improving weaker areas can increase your success probability.";
+
+    } else {
+
+        status = "Low Success Probability";
+        risk = "High Risk";
+        message =
+            "Your current performance needs improvement. Focus on the recommended areas.";
 
     }
 
 
-    finally {
+    // =================================================
+    // DISPLAY RESULT
+    // =================================================
 
-        const button =
-            document.querySelector(
-                ".predict-button"
-            );
+    document.getElementById("score").textContent =
+        finalScore + "%";
+
+    document.getElementById("status").textContent =
+        status;
+
+    document.getElementById("message").textContent =
+        message;
 
 
-        if (button) {
+    var riskElement = document.getElementById("risk");
 
-            button.textContent =
-                "🤖 Predict My Success";
+    riskElement.textContent = risk;
+    riskElement.className = "";
 
-            button.disabled = false;
-
-        }
-
+    if (risk === "Low Risk") {
+        riskElement.classList.add("low-risk");
+    } else if (risk === "Medium Risk") {
+        riskElement.classList.add("medium-risk");
+    } else {
+        riskElement.classList.add("high-risk");
     }
 
+
+    // =================================================
+    // PERFORMANCE ANALYSIS
+    // =================================================
+
+    var performanceAnalysis =
+        document.getElementById("performanceAnalysis");
+
+    performanceAnalysis.style.display = "block";
+
+
+    // Attendance
+    document.getElementById("attendanceResult").textContent =
+        attendance + "%";
+
+    document.getElementById("attendanceBar").style.width =
+        Math.min(attendance, 100) + "%";
+
+
+    // Assignment
+    document.getElementById("assignmentResult").textContent =
+        assignment + "%";
+
+    document.getElementById("assignmentBar").style.width =
+        Math.min(assignment, 100) + "%";
+
+
+    // Quiz
+    document.getElementById("quizResult").textContent =
+        quiz + "%";
+
+    document.getElementById("quizBar").style.width =
+        Math.min(quiz, 100) + "%";
+
+
+    // Midterm
+    document.getElementById("midtermResult").textContent =
+        midterm + "%";
+
+    document.getElementById("midtermBar").style.width =
+        Math.min(midterm, 100) + "%";
+
+
+    // Study hours
+    document.getElementById("studyResult").textContent =
+        studyHours + " hrs";
+
+    document.getElementById("studyBar").style.width =
+        Math.min(studyHours * 10, 100) + "%";
+
+
+    // Participation
+    document.getElementById("participationResult").textContent =
+        participation + "%";
+
+    document.getElementById("participationBar").style.width =
+        Math.min(participation, 100) + "%";
+
+
+    // =================================================
+    // STRONG / IMPROVE AREAS
+    // =================================================
+
+    var strongAreas =
+        document.getElementById("strongAreas");
+
+    var improveAreas =
+        document.getElementById("improveAreas");
+
+    strongAreas.innerHTML = "";
+    improveAreas.innerHTML = "";
+
+
+    // Attendance
+    if (attendance >= 85) {
+        strongAreas.innerHTML +=
+            "<div class='area-item'>✓ Attendance (" +
+            attendance +
+            "%)</div>";
+    } else if (attendance < 75) {
+        improveAreas.innerHTML +=
+            "<div class='area-item'>→ Attendance (" +
+            attendance +
+            "%)</div>";
+    }
+
+
+    // Assignment
+    if (assignment >= 85) {
+        strongAreas.innerHTML +=
+            "<div class='area-item'>✓ Assignment (" +
+            assignment +
+            "%)</div>";
+    } else if (assignment < 75) {
+        improveAreas.innerHTML +=
+            "<div class='area-item'>→ Assignment (" +
+            assignment +
+            "%)</div>";
+    }
+
+
+    // Quiz
+    if (quiz >= 85) {
+        strongAreas.innerHTML +=
+            "<div class='area-item'>✓ Quiz (" +
+            quiz +
+            "%)</div>";
+    } else if (quiz < 75) {
+        improveAreas.innerHTML +=
+            "<div class='area-item'>→ Quiz (" +
+            quiz +
+            "%)</div>";
+    }
+
+
+    // Midterm
+    if (midterm >= 85) {
+        strongAreas.innerHTML +=
+            "<div class='area-item'>✓ Midterm (" +
+            midterm +
+            "%)</div>";
+    } else if (midterm < 75) {
+        improveAreas.innerHTML +=
+            "<div class='area-item'>→ Midterm (" +
+            midterm +
+            "%)</div>";
+    }
+
+
+    // Participation
+    if (participation >= 85) {
+        strongAreas.innerHTML +=
+            "<div class='area-item'>✓ Participation (" +
+            participation +
+            "%)</div>";
+    } else if (participation < 75) {
+        improveAreas.innerHTML +=
+            "<div class='area-item'>→ Participation (" +
+            participation +
+            "%)</div>";
+    }
+
+
+    // Study hours
+    if (studyHours >= 10) {
+        strongAreas.innerHTML +=
+            "<div class='area-item'>✓ Study Routine (" +
+            studyHours +
+            " hrs)</div>";
+    } else if (studyHours < 7) {
+        improveAreas.innerHTML +=
+            "<div class='area-item'>→ Study Routine (" +
+            studyHours +
+            " hrs)</div>";
+    }
+
+
+    // GPA
+    if (previousGPA >= 3.5) {
+        strongAreas.innerHTML +=
+            "<div class='area-item'>✓ Previous GPA (" +
+            previousGPA +
+            ")</div>";
+    } else if (previousGPA < 2.5) {
+        improveAreas.innerHTML +=
+            "<div class='area-item'>→ Previous GPA (" +
+            previousGPA +
+            ")</div>";
+    }
+
+
+    if (improveAreas.innerHTML === "") {
+        improveAreas.innerHTML =
+            "<div class='area-item'>✓ No major weaknesses detected</div>";
+    }
+
+
+    // =================================================
+    // EXPLAINABLE AI
+    // =================================================
+
+    var explanationsList =
+        document.getElementById("explanationsList");
+
+    explanationsList.innerHTML = "";
+
+
+    addExplanation(
+        explanationsList,
+        "Attendance",
+        attendance >= 85,
+        "Your strong attendance is positively supporting your predicted score.",
+        "Improving attendance could positively affect your academic performance."
+    );
+
+    addExplanation(
+        explanationsList,
+        "Assignment",
+        assignment >= 85,
+        "Your assignment performance is positively supporting your prediction.",
+        "Improving assignment performance could increase your predicted score."
+    );
+
+    addExplanation(
+        explanationsList,
+        "Quiz",
+        quiz >= 85,
+        "Your quiz performance is positively supporting your prediction.",
+        "Improving quiz performance could increase your predicted score."
+    );
+
+    addExplanation(
+        explanationsList,
+        "Midterm",
+        midterm >= 85,
+        "Your strong midterm performance is positively supporting the prediction.",
+        "Improving midterm performance could improve your predicted result."
+    );
+
+    addExplanation(
+        explanationsList,
+        "Study Hours",
+        studyHours >= 10,
+        "Your focused study time is positively supporting your performance.",
+        "Increasing focused study time could improve your result."
+    );
+
+    addExplanation(
+        explanationsList,
+        "Previous GPA",
+        previousGPA >= 3.5,
+        "Your previous GPA is positively supporting the prediction.",
+        "Improving your academic performance can strengthen future GPA results."
+    );
+
+    addExplanation(
+        explanationsList,
+        "Participation",
+        participation >= 85,
+        "Your strong classroom participation is positively supporting your prediction.",
+        "Increasing classroom participation could improve your prediction."
+    );
+
+
+    // =================================================
+    // RECOMMENDATIONS
+    // =================================================
+
+    var recommendationsList =
+        document.getElementById("recommendationsList");
+
+    recommendationsList.innerHTML = "";
+
+
+    addRecommendation(
+        recommendationsList,
+        attendance >= 85
+            ? "Maintain your strong attendance."
+            : "Try to maintain attendance above 85%."
+    );
+
+
+    if (assignment < 85) {
+        addRecommendation(
+            recommendationsList,
+            "Try to improve assignment performance above 85%."
+        );
+    }
+
+
+    if (quiz < 85) {
+        addRecommendation(
+            recommendationsList,
+            "Improve quiz preparation to reach above 85%."
+        );
+    }
+
+
+    if (midterm < 85) {
+        addRecommendation(
+            recommendationsList,
+            "Continue revising regularly to improve exam performance."
+        );
+    }
+
+
+    if (studyHours < 10) {
+        addRecommendation(
+            recommendationsList,
+            "Aim for around 10 focused study hours per week."
+        );
+    }
+
+
+    if (previousGPA >= 3.5) {
+        addRecommendation(
+            recommendationsList,
+            "Your previous GPA shows strong academic progress."
+        );
+    } else {
+        addRecommendation(
+            recommendationsList,
+            "Focus on improving your academic performance to strengthen your GPA."
+        );
+    }
+
+
+    if (participation < 85) {
+        addRecommendation(
+            recommendationsList,
+            "Increase classroom participation."
+        );
+    }
+
+
+    // =================================================
+    // SHOW RESULT
+    // =================================================
+
+    var resultCard =
+        document.getElementById("resultCard");
+
+    resultCard.style.display = "block";
+
+    resultCard.scrollIntoView({
+        behavior: "smooth"
+    });
+}
+
+
+// =================================================
+// EXPLANATION HELPER
+// =================================================
+
+function addExplanation(
+    container,
+    factor,
+    positive,
+    positiveMessage,
+    moderateMessage
+) {
+
+    var item =
+        document.createElement("div");
+
+    item.className =
+        "explanation-item";
+
+    var icon = positive ? "🟢" : "🟡";
+
+    var impact = positive
+        ? "Positive"
+        : "Moderate";
+
+    item.innerHTML =
+        "<div class='explanation-header'>" +
+        "<span class='explanation-icon'>" +
+        icon +
+        "</span>" +
+        "<strong>" +
+        factor +
+        "</strong>" +
+        "<span class='impact'>" +
+        impact +
+        "</span>" +
+        "</div>" +
+        "<p>" +
+        (positive ? positiveMessage : moderateMessage) +
+        "</p>";
+
+    container.appendChild(item);
+}
+
+
+// =================================================
+// RECOMMENDATION HELPER
+// =================================================
+
+function addRecommendation(
+    container,
+    text
+) {
+
+    var item =
+        document.createElement("div");
+
+    item.className =
+        "recommendation-item";
+
+    item.innerHTML =
+        "<span class='recommendation-icon'>💡</span>" +
+        "<span>" +
+        text +
+        "</span>";
+
+    container.appendChild(item);
 }
 
 
@@ -476,40 +563,30 @@ else if (data.risk === "High Risk") {
 // AI IMPROVEMENT SIMULATOR
 // =================================================
 
-async function simulateImprovement() {
+function simulateImprovement() {
 
-    const targetAttendance =
+    var targetAttendance =
         Number(
-            document.getElementById(
-                "targetAttendance"
-            ).value
+            document.getElementById("targetAttendance").value
+        );
+
+    var targetAssignment =
+        Number(
+            document.getElementById("targetAssignment").value
+        );
+
+    var targetQuiz =
+        Number(
+            document.getElementById("targetQuiz").value
+        );
+
+    var targetStudyHours =
+        Number(
+            document.getElementById("targetStudyHours").value
         );
 
 
-    const targetAssignment =
-        Number(
-            document.getElementById(
-                "targetAssignment"
-            ).value
-        );
-
-
-    const targetQuiz =
-        Number(
-            document.getElementById(
-                "targetQuiz"
-            ).value
-        );
-
-
-    const targetStudyHours =
-        Number(
-            document.getElementById(
-                "targetStudyHours"
-            ).value
-        );
-
-
+    // Validate
     if (
         targetAttendance <= 0 ||
         targetAssignment <= 0 ||
@@ -517,180 +594,92 @@ async function simulateImprovement() {
         targetStudyHours <= 0
     ) {
 
+        alert("Please enter all target values.");
+        return;
+    }
+
+
+    // Current values
+    var midterm =
+        Number(
+            document.getElementById("midterm").value
+        );
+
+    var previousGPA =
+        Number(
+            document.getElementById("previous_gpa").value
+        );
+
+    var participation =
+        Number(
+            document.getElementById("participation").value
+        );
+
+
+    if (
+        document.getElementById("midterm").value === "" ||
+        document.getElementById("previous_gpa").value === "" ||
+        document.getElementById("participation").value === ""
+    ) {
+
         alert(
-            "Please enter all target values."
+            "Please enter your main student data first."
         );
 
         return;
     }
 
 
-    const midterm =
+    // GPA conversion
+    var gpaPercentage =
+        (previousGPA / 10) * 100;
+
+
+    // =================================================
+    // FUTURE SCORE
+    // 7 VALUES
+    // SUM / 700 × 100
+    // =================================================
+
+    var totalScore =
+        targetAttendance +
+        targetAssignment +
+        targetQuiz +
+        midterm +
+        targetStudyHours +
+        gpaPercentage +
+        participation;
+
+    var futureScore =
         Number(
-            document.getElementById(
-                "midterm"
-            ).value
+            ((totalScore / 700) * 100).toFixed(2)
         );
 
 
-    const previousGPA =
-        Number(
-            document.getElementById(
-                "previous_gpa"
-            ).value
-        );
+    console.log(
+        "Future Score:",
+        futureScore
+    );
 
 
-    const participation =
-        Number(
-            document.getElementById(
-                "participation"
-            ).value
-        );
+    // Display future score
+    document.getElementById("futureScore").textContent =
+        futureScore + "%";
 
 
-    try {
-
-        const response =
-            await fetch(
-                "http://127.0.0.1:8000/predict",
-                {
-
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-
-                        attendance:
-                            targetAttendance,
-
-                        assignment:
-                            targetAssignment,
-
-                        quiz:
-                            targetQuiz,
-
-                        midterm:
-                            midterm,
-
-                        study_hours:
-                            targetStudyHours,
-
-                        previous_gpa:
-                            previousGPA,
-
-                        participation:
-                            participation
-
-                    })
-
-                }
-            );
+    document.getElementById("improvementMessage").textContent =
+        "🚀 With these improvements, your predicted score could reach " +
+        futureScore +
+        "%. Keep working consistently!";
 
 
-        if (!response.ok) {
+    // Show result
+    var simulationResult =
+        document.getElementById("simulationResult");
 
-            throw new Error(
-                "Simulation request failed: " +
-                response.status
-            );
+    simulationResult.style.display = "block";
 
-        }
-
-
-        const data =
-            await response.json();
-
-
-        const futureScore =
-            document.getElementById(
-                "futureScore"
-            );
-
-
-        const improvementMessage =
-            document.getElementById(
-                "improvementMessage"
-            );
-
-
-        const simulationResult =
-            document.getElementById(
-                "simulationResult"
-            );
-
-
-        if (futureScore) {
-
-            futureScore.textContent =
-                data.predicted_score + "%";
-
-        }
-
-
-        if (improvementMessage) {
-
-            improvementMessage.textContent =
-                "🚀 With these improvements, " +
-                "your predicted score could reach " +
-                data.predicted_score +
-                "%. Keep working consistently!";
-
-        }
-
-
-        if (simulationResult) {
-
-            simulationResult.style.display =
-                "block";
-
-        }
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "Simulation Error:",
-            error
-        );
-
-
-        alert(
-            "Unable to connect to the AI server."
-        );
-
-    }
-
+    simulationResult.scrollIntoView({
+        behavior: "smooth"
+    });
 }
-
-document.querySelectorAll('input[type="number"]').forEach(input => {
-
-    input.addEventListener("keydown", function(event) {
-
-        if (event.key === "Enter") {
-            event.preventDefault();
-        }
-
-    });
-
-});
-
-document.querySelectorAll('input[type="number"]').forEach(input => {
-
-    input.addEventListener("wheel", function(event) {
-        event.preventDefault();
-        this.blur();
-    });
-
-});
-
-document.querySelectorAll("input").forEach(input => {
-    input.addEventListener("input", function () {
-        console.log(this.id, this.value);
-    });
-});
